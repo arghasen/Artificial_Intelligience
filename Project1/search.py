@@ -111,6 +111,7 @@ def breadthFirstSearch(problem):
     currentState = startState
     actions = []
     fringe = util.Queue()
+    print currentState
     exporedSet = set(currentState)
     while not problem.isGoalState(currentState):
         successors = problem.getSuccessors(currentState)
@@ -127,7 +128,22 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+    currentState = startState
+    actions = []
+    fringe = util.PriorityQueueWithFunction(lambda x: problem.getCostOfActions(x[1]))
+    exporedSet = set(currentState)
+    while not problem.isGoalState(currentState):
+        successors = problem.getSuccessors(currentState)
+        for successor in successors:
+            successorState = successor[0]
+            fringe.push((successorState, actions+[successor[1]]))
+
+        (currentState, actions) = fringe.pop()
+        while currentState in exporedSet:
+            (currentState, actions) = fringe.pop()
+        exporedSet.add(currentState)
+    return actions
 
 def nullHeuristic(state, problem=None):
     """
@@ -139,7 +155,22 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+    currentState = startState
+    actions = []
+    fringe = util.PriorityQueueWithFunction(lambda x: problem.getCostOfActions(x[1])+heuristic(x[0],problem) )
+    exporedSet = set(currentState)
+    while not problem.isGoalState(currentState):
+        successors = problem.getSuccessors(currentState)
+        for successor in successors:
+            successorState = successor[0]
+            fringe.push((successorState, actions+[successor[1]]))
+
+        (currentState, actions) = fringe.pop()
+        while currentState in exporedSet:
+            (currentState, actions) = fringe.pop()
+        exporedSet.add(currentState)
+    return actions
 
 
 # Abbreviations

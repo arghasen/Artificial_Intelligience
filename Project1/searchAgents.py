@@ -10,6 +10,7 @@
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
+from searchTestClasses import HeuristicTest
 
 
 """
@@ -287,7 +288,7 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
         # Please add any code here which you would like to use
         # in initializing the problem
-        "*** YOUR CODE HERE ***"
+        self.startState =(self.startingPosition, frozenset())
 
     def getStartState(self):
         """
@@ -295,14 +296,15 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startState
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return len(state[1]) == 4
+
 
     def getSuccessors(self, state):
         """
@@ -325,7 +327,18 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
+            x,y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            
+            if not self.walls[nextx][nexty]:
+                nextpos = (nextx, nexty)
+                cost = 1
+                if nextpos in self.corners:
+                    newvisitedcorners =frozenset((list(state[1])+[nextpos]))
+                else:
+                    newvisitedcorners = frozenset(state[1])
+                successors.append( ( (nextpos,newvisitedcorners), action, cost) )
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -360,7 +373,15 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    x,y = state[0]
+    pos=[]
+    for i in set(corners).difference(state[1]):
+        pos.append(abs(x-i[0])+abs(y-i[1]))
+    try:
+        return max(pos)
+    except ValueError:
+        return 0
+        
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -454,7 +475,20 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    x,y = position
+    pos=[]
+    for i in foodList:
+        pos.append(abs(x-i[0])+abs(y-i[1]))
+    try:
+        pos.sort()
+        heuristicCost = pos[0] if pos else 0
+        for i in xrange(len(pos)-1):
+            heuristicCost+=pos[i+1]-pos[i]
+        return heuristicCost
+    except ValueError:
+        return 0
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
